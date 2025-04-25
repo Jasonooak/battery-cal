@@ -1,0 +1,57 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>배터리 잔량 계산기</title>
+  <style>
+    body { font-family: sans-serif; max-width: 500px; margin: 40px auto; padding: 20px; background: #f9f9f9; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);}
+    h1 { font-size: 1.5em; margin-bottom: 1em; }
+    input { padding: 0.5em; width: 100%; font-size: 1em; margin-bottom: 1em; }
+    .result { font-size: 1.2em; margin-top: 1em; }
+    strong { font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h1>전기자전거 배터리 잔량 계산기</h1>
+  <label for="voltage">전압(V)을 입력하세요:</label>
+  <input type="number" id="voltage" step="0.1" value="48" />
+  <div class="result" id="result"></div>
+
+  <script>
+    function estimatePercentage(v) {
+      const voltageLevels = [54.6, 52, 50, 48, 46, 44, 42];
+      const percentageLevels = [100, 90, 80, 60, 40, 20, 0];
+      if (v >= 54.6) return 100;
+      if (v <= 42) return 0;
+      for (let i = 0; i < voltageLevels.length - 1; i++) {
+        if (v <= voltageLevels[i] && v >= voltageLevels[i + 1]) {
+          const ratio = (v - voltageLevels[i + 1]) / (voltageLevels[i] - voltageLevels[i + 1]);
+          return Math.round(
+            percentageLevels[i + 1] + ratio * (percentageLevels[i] - percentageLevels[i + 1])
+          );
+        }
+      }
+      return 0;
+    }
+
+    function getStatus(percentage) {
+      if (percentage >= 80) return "충분함";
+      if (percentage >= 40) return "안정 구간";
+      if (percentage >= 20) return "충전 필요 고려";
+      return "즉시 충전 필요";
+    }
+
+    function updateResult() {
+      const v = parseFloat(document.getElementById('voltage').value);
+      const p = estimatePercentage(v);
+      const status = getStatus(p);
+      document.getElementById('result').innerHTML = `→ 예상 잔량: <strong>${p}%</strong><br>→ 상태: <strong>${status}</strong>`;
+    }
+
+    document.getElementById('voltage').addEventListener('input', updateResult);
+    updateResult();
+  </script>
+</body>
+</html>
